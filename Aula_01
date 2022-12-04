@@ -1,0 +1,158 @@
+--- SELECIONA APENAS VALORES UNICOS
+SELECT DISTINCT CUSTOMER_ID
+FROM ORDERS;
+
+
+--- SELECIONA APENAS VALORES UNICOS e muda o nome 
+SELECT DISTINCT order_id AS 'ID_PEDIDO'
+        ,order_status AS 'STATUS_PEDIDO'
+        ,CUSTOMER_ID AS 'ID_DO_CLIENTE'
+FROM orders;
+         
+
+--- Contando a quantidade de registros retornados pela consulta
+SELECT COUNT(ORDER_ID)
+FROM ORDERS;
+
+-- Dando um apelido ao resultado retornado
+SELECT COUNT(*) AS 'QUANTIDADE_DE_LINHAS'
+FROM ORDERS;
+
+-- Contando quantidade de linhas não nulas da coluna customer_ID e dando um apelido ao resultado retornado
+SELECT COUNT(CUSTOMER_ID) AS 'QUANTIDADE_DE_CLIENTES'
+FROM ORDERS;
+
+-- Trabalhando com opção WHERE
+
+
+-- Contando todos os pedidos com o status delivered
+SELECT *
+FROM ORDERS
+WHERE ORDER_STATUS = 'delivered';
+
+
+-- Contando todos os pedidos com o status diferente de delivered
+SELECT *
+FROM ORDERS
+WHERE ORDER_STATUS != 'delivered';
+
+
+-- seleciona todas as linhas da tabela orders com o status diferente de delivered e que não tenham pedidos aprovados
+
+SELECT *
+FROM ORDERS
+WHERE ORDER_STATUS != 'delivered'
+AND ORDER_APPROVED_AT IS NULL;
+
+--- Utilizando o HAVING mas selecionar as linhas nas colunas após o uso do group_by e do count
+
+SELECT customer_state,
+COUNT(customer_state) AS 'Estado'
+FROM customers
+GROUP BY customer_state
+HAVING COUNT(customer_state) > 300;
+
+
+--- Apenas um pequeno teste
+
+SELECT COUNT(customer_state)
+FROM customers
+WHERE customer_state = 'SP';
+
+--- SELECIONANDO LINHAS UTILIZANDO PARTE DO VALOR COMO REFERENCIA
+
+SELECT customer_state,
+COUNT(customer_state) AS 'Estado'
+FROM customers
+WHERE customer_state LIKE '%R%'
+GROUP BY customer_state;
+
+
+
+--- Soma quantidade de valor gasto por tipo de pagamento MAX, MIN, AVG, SUM, COUNT
+
+SELECT PAYMENT_TYPE
+        ,COUNT(PAYMENT_VALUE) AS 'Quantidade'
+        ,MAX(PAYMENT_VALUE) AS 'pagamento_máximo'
+        ,AVG(PAYMENT_VALUE) AS 'pagamento_médio' 
+        ,MIN(PAYMENT_VALUE) AS 'pagamento_mínimo' 
+FROM ORDER_PAYMENTS
+GROUP BY PAYMENT_TYPE;
+
+
+--- mais prática com o HAVING
+
+SELECT PAYMENT_TYPE
+        ,SUM(PAYMENT_VALUE)
+FROM ORDER_PAYMENTS
+GROUP BY PAYMENT_TYPE
+HAVING SUM(PAYMENT_VALUE) > 0;
+
+--- PRÁTICA COM ORDER BY
+
+SELECT CUSTOMER_ID
+        ,CUSTOMER_CITY
+        ,CUSTOMER_STATE
+FROM CUSTOMERS
+ORDER BY CUSTOMER_CITY;
+
+--- PRÁTICA COM ORDER BY E GROUP BY
+SELECT CUSTOMER_STATE
+        ,COUNT(*) AS 'QUANTIDADE'
+FROM CUSTOMERS
+GROUP BY CUSTOMER_STATE
+ORDER BY 2 DESC;
+
+-- PRÁTICA COM JOINS
+SELECT PEDIDO.ORDER_ID
+        ,PEDIDO.ORDER_STATUS
+        ,CLIENTE.CUSTOMER_ID
+        ,CLIENTE.CUSTOMER_CITY
+        ,CLIENTE.CUSTOMER_STATE
+FROM ORDERS PEDIDO INNER JOIN CUSTOMERS CLIENTE
+ON PEDIDO.CUSTOMER_ID = CLIENTE.CUSTOMER_ID;
+
+
+--- Exemplo com vários inner joins
+SELECT PEDIDOS.ORDER_ID AS ID_PEDIDO
+        ,PRODUTOS.PRODUCT_ID AS ID_PRODUTO
+        ,PRODUTOS.PRODUCT_CATEGORY_NAME AS CATEGORIA_PRODUTO
+        ,PRODUTOS.PRODUCT_PHOTOS_QTY AS QTD_FOTOS_PRODUTO
+        ,ITENS.PRICE AS PREÇO
+        ,PAGAMENTOS.PAYMENT_TYPE AS TIPO_PAGAMENTO
+        ,PAGAMENTOS.PAYMENT_VALUE AS VALOR_PAGAMENTO
+FROM ORDER_ITEMS ITENS 
+
+INNER JOIN PRODUCTS PRODUTOS
+ON ITENS.PRODUCT_ID = PRODUTOS.PRODUCT_ID
+
+INNER JOIN ORDERS PEDIDOS
+ON PEDIDOS.ORDER_ID = ITENS.ORDER_ID
+
+INNER JOIN ORDER_PAYMENTS PAGAMENTOS
+ON PAGAMENTOS.ORDER_ID = PEDIDOS.ORDER_ID
+
+WHERE PRODUTOS.PRODUCT_PHOTOS_QTY > 1;
+
+-- FUNÇÕES SGBD
+
+SELECT RANDOM();
+
+SELECT UPPER(PRODUCT_CATEGORY_NAME) AS PRODUTOS FROM PRODUCTS;
+
+SELECT LENGTH(PRODUCT_CATEGORY_NAME) AS PRODUTOS FROM PRODUCTS;
+
+PRAGMA TABLE_INFO(ORDER_ITEMS);
+
+SELECT PRICE
+FROM ORDER_ITEMS
+WHERE CAST(PRICE AS FLOAT) > 100;
+
+-- Exemplo IN
+
+SELECT *
+FROM PRODUCTS
+     WHERE PRODUCT_ID IN (SELECT PRODUCT_ID
+                          FROM ORDER_ITEMS
+                          WHERE CAST(PRICE AS INT) > 500);
+                          
